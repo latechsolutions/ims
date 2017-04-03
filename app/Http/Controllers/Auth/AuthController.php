@@ -7,6 +7,8 @@ use Validator;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
+use Illuminate\Http\Request;
+use Auth;
 
 class AuthController extends Controller
 {
@@ -49,8 +51,8 @@ class AuthController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'name' => 'required|max:255',
-            'email' => 'required|email|max:255|unique:users',
+            'username' => 'required|max:45|unique:users',
+            'type' => 'required|max:90',
             'password' => 'required|min:6|confirmed',
         ]);
     }
@@ -64,9 +66,22 @@ class AuthController extends Controller
     protected function create(array $data)
     {
         return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
+            'username' => $data['username'],
+            'type' => $data['type'],
             'password' => bcrypt($data['password']),
         ]);
     }
+	
+	
+	public function login(Request $request)
+	{
+	   if(Auth::attempt(['username'=>$request->get('username'),'password'=>$request->get('password')]))
+	     {
+		   return redirect()->intended($this->redirectTo);
+		 }
+		 else
+		 {
+		    return redirect()->back()->withInput()->withErrors(['message'=>'Invalid Username or Password']);
+		 }
+	}
 }
